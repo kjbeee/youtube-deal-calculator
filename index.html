@@ -1,68 +1,202 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>YouTube Sponsorship Price Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <!-- CSS Styles -->
     <style>
-        /* Your existing CSS styles */
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        /* ... rest of your CSS ... */
-        .channel-result {
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        .header {
+            background-color: #d32f2f;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin-bottom: 10px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="date"] {
             padding: 10px;
-            border-bottom: 1px solid #ccc;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .video-input {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+        .video-input h3 {
+            margin-top: 0;
+            color: #d32f2f;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        button {
+            background-color: #d32f2f;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #b71c1c;
+        }
+        .results,
+        .history {
+            margin-top: 40px;
+        }
+        .collapsible {
+            background-color: #d32f2f;
+            color: white;
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 18px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+        .active,
+        .collapsible:hover {
+            background-color: #b71c1c;
+        }
+        .content {
+            padding: 0 15px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .content p {
+            margin: 15px 0;
+            color: #555;
+        }
+        .timestamp {
+            font-size: 0.9em;
+            color: #999;
+        }
+        .switcher-container {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .channel-result {
+            background-color: white;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .channel-result img {
+            border-radius: 50%;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
         .channel-result button {
-            margin-top: 5px;
+            background-color: #1976d2;
+            margin-top: 10px;
         }
-        /* ... any additional styles ... */
+        .channel-result button:hover {
+            background-color: #1565c0;
+        }
+        @media (max-width: 600px) {
+            .button-container {
+                margin-top: 20px;
+            }
+            button {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
 
 <div class="header">
     <h1>YouTube Sponsorship Price Calculator</h1>
-    <p>This calculator estimates the sponsorship fee for a YouTube creator based on their recent video performance.</p>
-    <p>Search for a YouTube channel, and the calculator will automatically retrieve data from their latest videos.</p>
+    <p>Estimate sponsorship fees based on recent video performance.</p>
 </div>
 
-<form id="calculatorForm">
-    <!-- Channel Search Section -->
-    <label for="channelSearch">Search YouTube Channel:</label>
-    <input type="text" id="channelSearch" name="channelSearch" placeholder="Enter channel name" required>
-    <button type="button" onclick="searchChannel()">Search Channel</button>
+<div class="container">
+    <form id="calculatorForm">
+        <!-- Channel Search Section -->
+        <label for="channelSearch">Search YouTube Channel:</label>
+        <input type="text" id="channelSearch" name="channelSearch" placeholder="Enter channel name" required>
+        <div class="button-container">
+            <button type="button" onclick="searchChannel()">Search Channel</button>
+        </div>
+        <div id="channelResults"></div>
 
-    <div id="channelResults"></div>
+        <!-- Creator Name -->
+        <label for="creatorName">Creator Name:</label>
+        <input type="text" id="creatorName" name="creatorName" required readonly>
 
-    <!-- Creator Name -->
-    <label for="creatorName">Creator Name:</label>
-    <input type="text" id="creatorName" name="creatorName" required readonly>
+        <!-- Rounding Switch -->
+        <div class="switcher-container">
+            <input type="checkbox" id="roundFees" name="roundFees">
+            <label for="roundFees">Round fees down to the nearest $100</label>
+        </div>
 
-    <!-- Rounding Switch -->
-    <div class="switcher-container">
-        <input type="checkbox" id="roundFees" name="roundFees">
-        <label for="roundFees">Round fees down to the nearest $100</label>
+        <!-- Video Data -->
+        <h2>Video Data</h2>
+        <div class="video-grid" id="videosContainer"></div>
+
+        <!-- Calculate Button -->
+        <div class="button-container">
+            <button type="button" onclick="calculateSponsorship()">Calculate Sponsorship Fee</button>
+        </div>
+    </form>
+
+    <div id="resultsContainer">
+        <!-- Results will be displayed here -->
     </div>
 
-    <!-- Video Data -->
-    <h2>Video Data</h2>
-    <div class="video-grid" id="videosContainer"></div>
-
-    <!-- Calculate Button -->
-    <div class="button-container">
-        <button type="button" onclick="calculateSponsorship()">Calculate Sponsorship Fee</button>
+    <div class="history" id="historyContainer">
+        <!-- Historical results will be displayed here -->
     </div>
-</form>
-
-<div id="resultsContainer">
-    <!-- Results will be displayed here -->
-</div>
-
-<div class="history" id="historyContainer">
-    <!-- Historical results will be displayed here -->
 </div>
 
 <script>
 // Place your API key here
-const API_KEY = 'AIzaSyDDpDLMGnQTwu4BJzNqPz1Wg630b9G6ZFI';
+const API_KEY = 'YOUR_API_KEY_HERE';
+
+let resultsHistory = [];
 
 // Function to search for a channel by name
 function searchChannel() {
@@ -97,13 +231,10 @@ function displayChannelResults(channels) {
         const channelDiv = document.createElement('div');
         channelDiv.className = 'channel-result';
         channelDiv.innerHTML = `
-            <p>
-                <strong>${channel.snippet.title}</strong><br>
-                <img src="${channel.snippet.thumbnails.default.url}" alt="${channel.snippet.title}">
-                <br>
-                ${channel.snippet.description}<br>
-                <button onclick="selectChannel('${channel.id.channelId}', '${channel.snippet.title.replace(/'/g, "\\'")}')">Select Channel</button>
-            </p>
+            <strong>${channel.snippet.title}</strong><br>
+            <img src="${channel.snippet.thumbnails.default.url}" alt="${channel.snippet.title}">
+            <p>${channel.snippet.description}</p>
+            <button onclick="selectChannel('${channel.id.channelId}', '${channel.snippet.title.replace(/'/g, "\\'")}')">Select Channel</button>
         `;
         channelResultsDiv.appendChild(channelDiv);
     });
@@ -191,13 +322,7 @@ function formatDate(dateString) {
     return `${year}-${month}-${day}`;
 }
 
-// Existing code for your calculator
-// ... include your existing JavaScript code here, such as calculateSponsorship(), displayResults(), updateHistory(), etc.
-
-// Ensure that functions like calculateSponsorship() are updated to handle dynamic number of videos as shown in previous responses.
-
-// Example: Adjust the calculateSponsorship() function to loop through the dynamic video inputs
-
+// Function to calculate sponsorship fee
 function calculateSponsorship() {
     const creatorName = document.getElementById('creatorName').value;
     let totalViews = 0;
@@ -281,8 +406,84 @@ function calculateSponsorship() {
     updateHistory();
 }
 
-// ... include the rest of your existing functions (displayResults, updateHistory, etc.)
+// Function to display the latest result
+function displayResults(result) {
+    const resultsContainer = document.getElementById('resultsContainer');
+    resultsContainer.innerHTML = ''; // Clear previous content
 
+    const collapsible = document.createElement('button');
+    collapsible.className = 'collapsible';
+    collapsible.textContent = `Latest Results for ${result.creatorName}`;
+    collapsible.addEventListener('click', function() {
+        this.classList.toggle('active');
+        const content = this.nextElementSibling;
+        if (content.style.maxHeight){
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+        } 
+    });
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'content';
+
+    contentDiv.innerHTML = `
+        <p><strong>Videos Considered:</strong> ${result.videoCount} (posted in the last 30 days)</p>
+        <p><strong>Estimated Views:</strong> ${result.estimatedViews.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+        <p><strong>Engagement Rate:</strong> ${result.engagementRate.toFixed(2)}%</p>
+        <p><strong>Minimum Fee:</strong> $${result.minFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (CPM: $${result.minCPM})</p>
+        <p><strong>Maximum Fee:</strong> $${result.maxFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (CPM: $${result.maxCPM})</p>
+        <p><strong>Fees Rounded:</strong> ${result.roundFees ? "Yes" : "No"}</p>
+    `;
+
+    resultsContainer.appendChild(collapsible);
+    resultsContainer.appendChild(contentDiv);
+}
+
+// Function to update the results history display
+function updateHistory() {
+    const historyContainer = document.getElementById('historyContainer');
+    historyContainer.innerHTML = ''; // Clear previous content
+
+    if (resultsHistory.length === 0) return;
+
+    const collapsible = document.createElement('button');
+    collapsible.className = 'collapsible';
+    collapsible.textContent = `Results History (${resultsHistory.length} entries)`;
+    collapsible.addEventListener('click', function() {
+        this.classList.toggle('active');
+        const content = this.nextElementSibling;
+        if (content.style.maxHeight){
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+        } 
+    });
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'content';
+
+    resultsHistory.slice().reverse().forEach(result => {
+        const timestamp = result.timestamp.toLocaleString();
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        historyItem.innerHTML = `
+            <p class="timestamp">${timestamp}</p>
+            <p><strong>Creator Name:</strong> ${result.creatorName}</p>
+            <p><strong>Videos Considered:</strong> ${result.videoCount}</p>
+            <p><strong>Estimated Views:</strong> ${result.estimatedViews.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+            <p><strong>Engagement Rate:</strong> ${result.engagementRate.toFixed(2)}%</p>
+            <p><strong>Minimum Fee:</strong> $${result.minFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (CPM: $${result.minCPM})</p>
+            <p><strong>Maximum Fee:</strong> $${result.maxFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (CPM: $${result.maxCPM})</p>
+            <p><strong>Fees Rounded:</strong> ${result.roundFees ? "Yes" : "No"}</p>
+            <hr>
+        `;
+        contentDiv.appendChild(historyItem);
+    });
+
+    historyContainer.appendChild(collapsible);
+    historyContainer.appendChild(contentDiv);
+}
 </script>
 
 </body>
