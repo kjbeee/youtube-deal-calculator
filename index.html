@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <title>YouTube Sponsorship Price Calculator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-    <!-- CSS Styles -->
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -67,19 +65,27 @@
         .section-title {
             margin-bottom: 10px;
         }
+        .expandable-row {
+            cursor: pointer;
+            background-color: #f9f9f9;
+        }
+        .expandable-row:hover {
+            background-color: #e0e0e0;
+        }
+        .expanded-content {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
 
-    <!-- Header Section -->
     <section id="header-section">
         <h1>YouTube Sponsorship Price Calculator</h1>
         <p>Estimate sponsorship fees based on recent video performance.</p>
     </section>
 
-    <!-- Search Section -->
     <section id="search-section">
         <h2 class="section-title">Search Section</h2>
         <label for="channelSearch">Search YouTube Channel:</label>
@@ -88,7 +94,6 @@
         <div id="channelResults"></div>
     </section>
 
-    <!-- Price Section -->
     <section id="price-section">
         <h2 class="section-title">Price Section</h2>
         <label for="cpmSlider">Select CPM ($):</label>
@@ -97,13 +102,11 @@
         <button type="button" onclick="calculateSponsorship()">Calculate Sponsorship Fee</button>
     </section>
 
-    <!-- Calculation Results Section -->
     <section id="results-section">
         <h2 class="section-title">Calculation Results</h2>
         <div id="latestResults"></div>
     </section>
 
-    <!-- Video Data Section -->
     <section id="video-data-section">
         <h2 class="section-title">Video Data Section</h2>
         <table id="videoDataTable">
@@ -116,24 +119,29 @@
                     <th>Comments</th>
                 </tr>
             </thead>
-            <tbody id="videosContainer">
-                <!-- Video data rows will be inserted here -->
-            </tbody>
+            <tbody id="videosContainer"></tbody>
         </table>
     </section>
 
-    <!-- History Section -->
     <section id="history-section">
         <h2 class="section-title">History Section</h2>
-        <div id="historyContainer"></div>
+        <table id="historyTable">
+            <thead>
+                <tr>
+                    <th>Result</th>
+                    <th>Estimated Views</th>
+                    <th>Sponsorship Fee</th>
+                </tr>
+            </thead>
+            <tbody id="historyContainer"></tbody>
+        </table>
     </section>
 
 </div>
 
 <script>
 // Place your API key here
-const API_KEY = 'AIzaSyDDpDLMGnQTwu4BJzNqPz1Wg630b9G6ZFI';
-
+const API_KEY = 'YOUR_API_KEY_HERE';
 let resultsHistory = [];
 
 // Function to update CPM output
@@ -237,7 +245,6 @@ function fetchVideoStatistics(videoIds) {
 
 // Function to populate video data into the table
 function populateVideoData(videos) {
-    // Clear existing video inputs
     const container = document.getElementById('videosContainer');
     container.innerHTML = '';
 
@@ -264,28 +271,69 @@ function formatDate(dateString) {
     return `${year}-${month}-${day}`;
 }
 
-// Function to calculate sponsorship fee
+// Function to calculate sponsorship fee with refined logic
 function calculateSponsorship() {
     const cpmValue = parseInt(document.getElementById('cpmSlider').value);
-    const videoRows = document.querySelectorAll('#videosContainer tr');
-    let totalViews = 0;
+    const videoRows = Array.from(document.querySelectorAll('#videosContainer tr'));
+    let totalViews = 0, totalWeight = 0, engagementSum = 0;
+    const recentVideos = [];
+    const today = new Date();
+    const sixtyDaysAgo = new Date();
+    sixtyDaysAgo.setDate(today.getDate() - 60);
+
+    // Step 1: Filter videos based on recency
     videoRows.forEach(row => {
-        totalViews += parseInt(row.querySelector('input[name^="views"]').value) || 0;
+        const datePosted = new Date(row.querySelector(`input[name^="date"]`).value);
+        const views = parseInt(row.querySelector('input[name^="views"]').value) || 0;
+        const likes = parseInt(row.querySelector('input[name^="likes"]').value) || 0;
+        const comments = parseInt(row.querySelector('input[name^="comments"]').value) || 0;
+        const engagementRate = (likes + comments) / views;
+
+        // Only consider videos from the last 60 days
+        if (datePosted >= sixtyDaysAgo) {
+            recentVideos.push({ datePosted, views, likes, comments, engagementRate });
+        }
     });
-    const estimatedViews = totalViews / videoRows.length;
+
+    // Step 2: Exclude outliers (using standard deviation)
+    const viewsArray = recentVideos.map(v => v.views);
+    const averageViews = viewsArray.reduce((a, b) => a + b, 0) / viewsArray.length;
+    const stdDev = Math.sqrt(viewsArray.map(v => Math.pow(v - averageViews, 2)).reduce((a, b) => a + b, 0) / viewsArray.length);
+    const filteredVideos = recentVideos.filter(v => Math.abs(v.views - averageViews) <= 2 * stdDev);
+
+    // Step 3: Weight more recent videos more heavily
+    filteredVideos.forEach(video => {
+        const daysOld = Math.ceil((today - video.datePosted) / (1000 * 60 * 60 * 24));
+        const weight = daysOld <= 30 ? 1.5 : 1;
+        totalViews += video.views * weight;
+        totalWeight += weight;
+        engagementSum += video.engagementRate;
+    });
+
+    // Step 4: Calculate weighted average views
+    const weightedAverageViews = totalViews / totalWeight;
+
+    // Step 5: Adjust based on engagement rate
+    const avgEngagementRate = engagementSum / filteredVideos.length;
+    let estimatedViews = weightedAverageViews;
+    if (avgEngagementRate > 0.05) {
+        estimatedViews *= 1.05; // Increase by 5% if engagement rate is high
+    } else if (avgEngagementRate < 0.02) {
+        estimatedViews *= 0.95; // Decrease by 5% if engagement rate is low
+    }
+
+    // Calculate sponsorship fee
     const sponsorshipFee = (estimatedViews / 1000) * cpmValue;
-    
-    // Display the result in the results section
+
+    // Display the result
     document.getElementById('latestResults').innerHTML = `
-        <p><strong>Estimated Views:</strong> ${estimatedViews.toLocaleString()}</p>
+        <p><strong>Estimated Views:</strong> ${Math.round(estimatedViews).toLocaleString()}</p>
         <p><strong>Calculated Sponsorship Fee:</strong> $${sponsorshipFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
     `;
-    
+
     // Add to history
-    resultsHistory.push({
-        estimatedViews,
-        sponsorshipFee
-    });
+    const result = { estimatedViews, sponsorshipFee, filteredVideos };
+    resultsHistory.push(result);
     updateHistory();
 }
 
@@ -294,10 +342,55 @@ function updateHistory() {
     const historyContainer = document.getElementById('historyContainer');
     historyContainer.innerHTML = '';
     resultsHistory.forEach((result, index) => {
-        historyContainer.innerHTML += `
-            <p><strong>Result ${index + 1}:</strong> Estimated Views: ${result.estimatedViews.toLocaleString()}, Sponsorship Fee: $${result.sponsorshipFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+        const row = document.createElement('tr');
+        row.classList.add('expandable-row');
+        row.onclick = () => toggleExpandedContent(index);
+
+        row.innerHTML = `
+            <td>Result ${index + 1}</td>
+            <td>${Math.round(result.estimatedViews).toLocaleString()}</td>
+            <td>$${result.sponsorshipFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
         `;
+
+        const expandedContentRow = document.createElement('tr');
+        expandedContentRow.classList.add('expanded-content');
+        expandedContentRow.innerHTML = `
+            <td colspan="3">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Video #</th>
+                            <th>Date Posted</th>
+                            <th>Views</th>
+                            <th>Likes</th>
+                            <th>Comments</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${result.filteredVideos.map((video, idx) => `
+                            <tr>
+                                <td>${idx + 1}</td>
+                                <td>${formatDate(video.datePosted)}</td>
+                                <td>${video.views.toLocaleString()}</td>
+                                <td>${video.likes.toLocaleString()}</td>
+                                <td>${video.comments.toLocaleString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </td>
+        `;
+
+        historyContainer.appendChild(row);
+        historyContainer.appendChild(expandedContentRow);
     });
+}
+
+// Function to toggle expanded content in the history table
+function toggleExpandedContent(index) {
+    const rows = document.querySelectorAll(`#historyContainer tr`);
+    const expandedContentRow = rows[(index * 2) + 1]; // Get the row following the expandable row
+    expandedContentRow.style.display = expandedContentRow.style.display === 'table-row' ? 'none' : 'table-row';
 }
 </script>
 
