@@ -3,73 +3,17 @@
 <head>
     <title>YouTube Sponsorship Price Calculator</title>
     <style>
+        /* Your existing CSS styles */
         body { font-family: Arial, sans-serif; margin: 20px; }
-        .header { margin-bottom: 20px; }
-        .header h1 { margin-bottom: 10px; }
-        .header p { margin: 0; }
-        label { display: block; margin-bottom: 5px; }
-        input[type="text"], input[type="number"], input[type="date"] { padding: 5px; width: 100%; box-sizing: border-box; }
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 15px;
-        }
-        .video-input {
-            border: 1px solid #ccc;
+        /* ... rest of your CSS ... */
+        .channel-result {
             padding: 10px;
-            border-radius: 5px;
-        }
-        .results { margin-top: 20px; }
-        .button-container {
-            margin-top: 20px;
-        }
-        #calculatorForm {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        .switcher-container {
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
-        .history {
-            margin-top: 40px;
-        }
-        .history h2 {
-            margin-bottom: 10px;
-        }
-        .history-item {
             border-bottom: 1px solid #ccc;
-            padding: 10px 0;
         }
-        .timestamp {
-            font-size: 0.9em;
-            color: #666;
+        .channel-result button {
+            margin-top: 5px;
         }
-        /* Styles for collapsible sections */
-        .collapsible {
-            background-color: #f1f1f1;
-            color: #444;
-            cursor: pointer;
-            padding: 10px;
-            width: 100%;
-            border: none;
-            text-align: left;
-            outline: none;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-        .active, .collapsible:hover {
-            background-color: #ccc;
-        }
-        .content {
-            padding: 0 15px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.2s ease-out;
-            background-color: white;
-            border: 1px solid #ccc;
-            margin-bottom: 10px;
-        }
+        /* ... any additional styles ... */
     </style>
 </head>
 <body>
@@ -77,21 +21,32 @@
 <div class="header">
     <h1>YouTube Sponsorship Price Calculator</h1>
     <p>This calculator estimates the sponsorship fee for a YouTube creator based on their recent video performance.</p>
-    <p>Enter the creator's name and input data for their 10 most recent videos, including the date posted. The CPM rates are fixed at a minimum of $5 and a maximum of $10. Click "Calculate Sponsorship Fee" to see the estimated views and fee range based on videos from the last 30 days.</p>
+    <p>Search for a YouTube channel, and the calculator will automatically retrieve data from their latest videos.</p>
 </div>
 
 <form id="calculatorForm">
-    <label for="creatorName">Creator Name:</label>
-    <input type="text" id="creatorName" name="creatorName" required>
+    <!-- Channel Search Section -->
+    <label for="channelSearch">Search YouTube Channel:</label>
+    <input type="text" id="channelSearch" name="channelSearch" placeholder="Enter channel name" required>
+    <button type="button" onclick="searchChannel()">Search Channel</button>
 
+    <div id="channelResults"></div>
+
+    <!-- Creator Name -->
+    <label for="creatorName">Creator Name:</label>
+    <input type="text" id="creatorName" name="creatorName" required readonly>
+
+    <!-- Rounding Switch -->
     <div class="switcher-container">
         <input type="checkbox" id="roundFees" name="roundFees">
         <label for="roundFees">Round fees down to the nearest $100</label>
     </div>
 
+    <!-- Video Data -->
     <h2>Video Data</h2>
     <div class="video-grid" id="videosContainer"></div>
 
+    <!-- Calculate Button -->
     <div class="button-container">
         <button type="button" onclick="calculateSponsorship()">Calculate Sponsorship Fee</button>
     </div>
@@ -106,33 +61,143 @@
 </div>
 
 <script>
-let resultsHistory = [];
+// Place your API key here
+const API_KEY = 'YOUR_API_KEY_HERE';
 
-// Function to create input fields for 10 videos
-function createVideoInputs() {
+// Function to search for a channel by name
+function searchChannel() {
+    const query = document.getElementById('channelSearch').value;
+    if (!query) {
+        alert('Please enter a channel name.');
+        return;
+    }
+
+    fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=5&q=${encodeURIComponent(query)}&key=${API_KEY}`)
+        .then(response => response.json())
+        .then(data => {
+            displayChannelResults(data.items);
+        })
+        .catch(error => {
+            console.error('Error fetching channel data:', error);
+            alert('An error occurred while searching for the channel.');
+        });
+}
+
+// Function to display channel search results
+function displayChannelResults(channels) {
+    const channelResultsDiv = document.getElementById('channelResults');
+    channelResultsDiv.innerHTML = '';
+
+    if (channels.length === 0) {
+        channelResultsDiv.innerHTML = '<p>No channels found.</p>';
+        return;
+    }
+
+    channels.forEach(channel => {
+        const channelDiv = document.createElement('div');
+        channelDiv.className = 'channel-result';
+        channelDiv.innerHTML = `
+            <p>
+                <strong>${channel.snippet.title}</strong><br>
+                <img src="${channel.snippet.thumbnails.default.url}" alt="${channel.snippet.title}">
+                <br>
+                ${channel.snippet.description}<br>
+                <button onclick="selectChannel('${channel.id.channelId}', '${channel.snippet.title.replace(/'/g, "\\'")}')">Select Channel</button>
+            </p>
+        `;
+        channelResultsDiv.appendChild(channelDiv);
+    });
+}
+
+// Function to handle channel selection
+function selectChannel(channelId, channelTitle) {
+    document.getElementById('creatorName').value = channelTitle;
+    document.getElementById('channelResults').innerHTML = '';
+    fetchChannelVideos(channelId);
+}
+
+// Function to fetch the channel's uploads playlist ID
+function fetchChannelVideos(channelId) {
+    fetch(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${API_KEY}`)
+        .then(response => response.json())
+        .then(data => {
+            const uploadsPlaylistId = data.items[0].contentDetails.relatedPlaylists.uploads;
+            fetchVideosFromPlaylist(uploadsPlaylistId);
+        })
+        .catch(error => {
+            console.error('Error fetching channel uploads:', error);
+            alert('An error occurred while fetching channel uploads.');
+        });
+}
+
+// Function to fetch videos from the uploads playlist
+function fetchVideosFromPlaylist(playlistId) {
+    fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=10&playlistId=${playlistId}&key=${API_KEY}`)
+        .then(response => response.json())
+        .then(data => {
+            const videoIds = data.items.map(item => item.snippet.resourceId.videoId);
+            fetchVideoStatistics(videoIds);
+        })
+        .catch(error => {
+            console.error('Error fetching playlist videos:', error);
+            alert('An error occurred while fetching playlist videos.');
+        });
+}
+
+// Function to fetch video statistics
+function fetchVideoStatistics(videoIds) {
+    fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoIds.join(',')}&key=${API_KEY}`)
+        .then(response => response.json())
+        .then(data => {
+            populateVideoData(data.items);
+        })
+        .catch(error => {
+            console.error('Error fetching video statistics:', error);
+            alert('An error occurred while fetching video statistics.');
+        });
+}
+
+// Function to populate video data into the form
+function populateVideoData(videos) {
+    // Clear existing video inputs
     const container = document.getElementById('videosContainer');
-    for (let i = 1; i <= 10; i++) {
+    container.innerHTML = '';
+
+    videos.forEach((video, index) => {
+        const i = index + 1;
         const videoDiv = document.createElement('div');
         videoDiv.className = 'video-input';
         videoDiv.innerHTML = `
             <h3>Video ${i}</h3>
             <label for="date${i}">Date Posted:</label>
-            <input type="date" id="date${i}" name="date${i}" required>
+            <input type="date" id="date${i}" name="date${i}" value="${formatDate(video.snippet.publishedAt)}" required>
             <label for="views${i}">Views:</label>
-            <input type="number" id="views${i}" name="views${i}" required>
+            <input type="number" id="views${i}" name="views${i}" value="${video.statistics.viewCount}" required>
             <label for="likes${i}">Likes:</label>
-            <input type="number" id="likes${i}" name="likes${i}" required>
+            <input type="number" id="likes${i}" name="likes${i}" value="${video.statistics.likeCount}" required>
             <label for="comments${i}">Comments:</label>
-            <input type="number" id="comments${i}" name="comments${i}" required>
+            <input type="number" id="comments${i}" name="comments${i}" value="${video.statistics.commentCount}" required>
         `;
         container.appendChild(videoDiv);
-    }
+    });
 }
 
-// Call the function to create video inputs on page load
-createVideoInputs();
+// Helper function to format date to YYYY-MM-DD
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = (`0${(date.getMonth()+1)}`).slice(-2);
+    const day = (`0${date.getDate()}`).slice(-2);
+    return `${year}-${month}-${day}`;
+}
 
-// Function to calculate sponsorship fee
+// Existing code for your calculator
+// ... include your existing JavaScript code here, such as calculateSponsorship(), displayResults(), updateHistory(), etc.
+
+// Ensure that functions like calculateSponsorship() are updated to handle dynamic number of videos as shown in previous responses.
+
+// Example: Adjust the calculateSponsorship() function to loop through the dynamic video inputs
+
 function calculateSponsorship() {
     const creatorName = document.getElementById('creatorName').value;
     let totalViews = 0;
@@ -144,12 +209,15 @@ function calculateSponsorship() {
     const last30Days = new Date();
     last30Days.setDate(today.getDate() - 30);
 
+    const videoInputs = document.getElementsByClassName('video-input');
+
     // Gather data from each video
-    for (let i = 1; i <= 10; i++) {
-        const datePostedStr = document.getElementById(`date${i}`).value;
-        const views = parseInt(document.getElementById(`views${i}`).value) || 0;
-        const likes = parseInt(document.getElementById(`likes${i}`).value) || 0;
-        const comments = parseInt(document.getElementById(`comments${i}`).value) || 0;
+    for (let i = 0; i < videoInputs.length; i++) {
+        const index = i + 1;
+        const datePostedStr = document.getElementById(`date${index}`).value;
+        const views = parseInt(document.getElementById(`views${index}`).value) || 0;
+        const likes = parseInt(document.getElementById(`likes${index}`).value) || 0;
+        const comments = parseInt(document.getElementById(`comments${index}`).value) || 0;
 
         // Convert date string to Date object
         const datePosted = new Date(datePostedStr);
@@ -213,100 +281,8 @@ function calculateSponsorship() {
     updateHistory();
 }
 
-// Function to display the latest result
-function displayResults(result) {
-    const resultsContainer = document.getElementById('resultsContainer');
-    resultsContainer.innerHTML = ''; // Clear previous content
+// ... include the rest of your existing functions (displayResults, updateHistory, etc.)
 
-    const collapsible = document.createElement('button');
-    collapsible.className = 'collapsible';
-    collapsible.textContent = `Latest Results for ${result.creatorName}`;
-    collapsible.addEventListener('click', function() {
-        this.classList.toggle('active');
-        const content = this.nextElementSibling;
-        if (content.style.maxHeight){
-            content.style.maxHeight = null;
-        } else {
-            content.style.maxHeight = content.scrollHeight + "px";
-        } 
-    });
-
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'content';
-
-    contentDiv.innerHTML = `
-        <p><strong>Videos Considered:</strong> ${result.videoCount} (posted in the last 30 days)</p>
-        <p><strong>Estimated Views:</strong> ${result.estimatedViews.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
-        <p><strong>Engagement Rate:</strong> ${result.engagementRate.toFixed(2)}%</p>
-        <p><strong>Minimum Fee:</strong> $${result.minFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (CPM: $${result.minCPM})</p>
-        <p><strong>Maximum Fee:</strong> $${result.maxFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (CPM: $${result.maxCPM})</p>
-        <p><strong>Fees Rounded:</strong> ${result.roundFees ? "Yes" : "No"}</p>
-    `;
-
-    resultsContainer.appendChild(collapsible);
-    resultsContainer.appendChild(contentDiv);
-}
-
-// Function to update the results history display
-function updateHistory() {
-    const historyContainer = document.getElementById('historyContainer');
-    historyContainer.innerHTML = ''; // Clear previous content
-
-    if (resultsHistory.length === 0) return;
-
-    const collapsible = document.createElement('button');
-    collapsible.className = 'collapsible';
-    collapsible.textContent = `Results History (${resultsHistory.length} entries)`;
-    collapsible.addEventListener('click', function() {
-        this.classList.toggle('active');
-        const content = this.nextElementSibling;
-        if (content.style.maxHeight){
-            content.style.maxHeight = null;
-        } else {
-            content.style.maxHeight = content.scrollHeight + "px";
-        } 
-    });
-
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'content';
-
-    resultsHistory.slice().reverse().forEach(result => {
-        const timestamp = result.timestamp.toLocaleString();
-        const historyItem = document.createElement('div');
-        historyItem.className = 'history-item';
-        historyItem.innerHTML = `
-            <p class="timestamp">${timestamp}</p>
-            <p><strong>Creator Name:</strong> ${result.creatorName}</p>
-            <p><strong>Videos Considered:</strong> ${result.videoCount}</p>
-            <p><strong>Estimated Views:</strong> ${result.estimatedViews.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
-            <p><strong>Engagement Rate:</strong> ${result.engagementRate.toFixed(2)}%</p>
-            <p><strong>Minimum Fee:</strong> $${result.minFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (CPM: $${result.minCPM})</p>
-            <p><strong>Maximum Fee:</strong> $${result.maxFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (CPM: $${result.maxCPM})</p>
-            <p><strong>Fees Rounded:</strong> ${result.roundFees ? "Yes" : "No"}</p>
-            <hr>
-        `;
-        contentDiv.appendChild(historyItem);
-    });
-
-    historyContainer.appendChild(collapsible);
-    historyContainer.appendChild(contentDiv);
-}
-
-// Event listener for collapsible sections
-document.addEventListener('DOMContentLoaded', function() {
-    const coll = document.getElementsByClassName('collapsible');
-    for (let i = 0; i < coll.length; i++) {
-        coll[i].addEventListener('click', function() {
-            this.classList.toggle('active');
-            const content = this.nextElementSibling;
-            if (content.style.maxHeight){
-                content.style.maxHeight = null;
-            } else {
-                content.style.maxHeight = content.scrollHeight + "px";
-            } 
-        });
-    }
-});
 </script>
 
 </body>
