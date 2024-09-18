@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouTube Sponsorship Price Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { margin-bottom: 20px; }
+        .header h1 { margin-bottom: 10px; }
+        .header p { margin: 0; }
+        label { display: block; margin-bottom: 5px; }
+        input[type="text"], input[type="number"], input[type="date"] { padding: 5px; width: 100%; box-sizing: border-box; }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+        .video-input {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .results { margin-top: 20px; }
+        .button-container {
+            margin-top: 20px;
+        }
+        #calculatorForm {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .switcher-container {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .history {
+            margin-top: 40px;
+        }
+        .history h2 {
+            margin-bottom: 10px;
+        }
+        .history-item {
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+        }
+        .timestamp {
+            font-size: 0.9em;
+            color: #666;
+        }
+        /* Styles for collapsible sections */
+        .collapsible {
+            background-color: #f1f1f1;
+            color: #444;
+            cursor: pointer;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .active, .collapsible:hover {
+            background-color: #ccc;
+        }
+        .content {
+            padding: 0 15px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            background-color: white;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>YouTube Sponsorship Price Calculator</h1>
+    <p>This calculator estimates the sponsorship fee for a YouTube creator based on their recent video performance.</p>
+    <p>Enter the creator's name and input data for their 10 most recent videos, including the date posted. The CPM rates are fixed at a minimum of $5 and a maximum of $10. Click "Calculate Sponsorship Fee" to see the estimated views and fee range based on videos from the last 30 days.</p>
+</div>
+
+<form id="calculatorForm">
+    <label for="creatorName">Creator Name:</label>
+    <input type="text" id="creatorName" name="creatorName" required>
+
+    <div class="switcher-container">
+        <input type="checkbox" id="roundFees" name="roundFees">
+        <label for="roundFees">Round fees down to the nearest $100</label>
+    </div>
+
+    <h2>Video Data</h2>
+    <div class="video-grid" id="videosContainer"></div>
+
+    <div class="button-container">
+        <button type="button" onclick="calculateSponsorship()">Calculate Sponsorship Fee</button>
+    </div>
+</form>
+
+<div id="resultsContainer">
+    <!-- Results will be displayed here -->
+</div>
+
+<div class="history" id="historyContainer">
+    <!-- Historical results will be displayed here -->
+</div>
+
+<script>
+let resultsHistory = [];
+
+// Function to create input fields for 10 videos
+function createVideoInputs() {
+    const container = document.getElementById('videosContainer');
+    for (let i = 1; i <= 10; i++) {
+        const videoDiv = document.createElement('div');
+        videoDiv.className = 'video-input';
+        videoDiv.innerHTML = `
+            <h3>Video ${i}</h3>
+            <label for="date${i}">Date Posted:</label>
+            <input type="date" id="date${i}" name="date${i}" required>
+            <label for="views${i}">Views:</label>
+            <input type="number" id="views${i}" name="views${i}" required>
+            <label for="likes${i}">Likes:</label>
+            <input type="number" id="likes${i}" name="likes${i}" required>
+            <label for="comments${i}">Comments:</label>
+            <input type="number" id="comments${i}" name="comments${i}" required>
+        `;
+        container.appendChild(videoDiv);
+    }
+}
+
+// Call the function to create video inputs on page load
+createVideoInputs();
+
+// Function to calculate sponsorship fee
+function calculateSponsorship() {
+    const creatorName = document.getElementById('creatorName').value;
+    let totalViews = 0;
+    let totalLikes = 0;
+    let totalComments = 0;
+    let videoCount = 0;
+
+    const today = new Date();
+    const last30Days = new Date();
+    last30Days.setDate(today.getDate() - 30);
+
+    // Gather data from each video
+    for (let i = 1; i <= 10; i++) {
+        const datePostedStr = document.getElementById(`date${i}`).value;
+        const views = parseInt(document.getElementById(`views${i}`).value) || 0;
+        const likes = parseInt(document.getElementById(`likes${i}`).value) || 0;
+        const comments = parseInt(document.getElementById(`comments${i}`).value) || 0;
+
+        // Convert date string to Date object
+        const datePosted = new Date(datePostedStr);
+
+        // Check if the video was posted within the last 30 days
+        if (datePosted >= last30Days && datePosted <= today) {
+            totalViews += views;
+            totalLikes += likes;
+            totalComments += comments;
+            videoCount++;
+        }
+    }
+
+    // Ensure there is at least one video in the last 30 days
+    if (videoCount === 0) {
+        alert("No videos were posted in the last 30 days. Cannot calculate estimated views.");
+        return;
+    }
+
+    const estimatedViews = totalViews / videoCount;
+    const engagementRate = totalViews > 0 ? ((totalLikes + totalComments) / totalViews) * 100 : 0;
+
+    // Fixed CPM rates
+    const minCPM = 5;
+    const maxCPM = 10;
+
+    // Determine if rounding is enabled
+    const roundFees = document.getElementById('roundFees').checked;
+
+    // Calculate fees
+    let minFee = (estimatedViews / 1000) * minCPM;
+    let maxFee = (estimatedViews / 1000) * maxCPM;
+
+    // Apply rounding if checkbox is selected
+    if (roundFees) {
+        minFee = Math.floor(minFee / 100) * 100;
+        maxFee = Math.floor(maxFee / 100) * 100;
+    }
+
+    // Create a result object
+    const result = {
+        timestamp: new Date(),
+        creatorName,
+        videoCount,
+        estimatedViews: estimatedViews,
+        engagementRate: engagementRate,
+        minFee: minFee,
+        maxFee: maxFee,
+        minCPM,
+        maxCPM,
+        roundFees
+    };
+
+    // Add the result to the history array
+    resultsHistory.push(result);
+
+    // Update the results display
+    displayResults(result);
+
+    // Update the history display
+    updateHistory();
+}
+
+// Function to display the latest result
+function displayResults(result) {
+    const resultsContainer = document.getElementById('resultsContainer');
+    resultsContainer.innerHTML = ''; // Clear previous content
+
+    const collapsible = document.createElement('button');
+    collapsible.className = 'collapsible';
+    collapsible.textContent = `Latest Results for ${result.creatorName}`;
+    collapsible.addEventListener('click', function() {
+        this.classList.toggle('active');
+        const content = this.nextElementSibling;
+        if (content.style.maxHeight){
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+        } 
+    });
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'content';
+
+    contentDiv.innerHTML = `
+        <p><strong>Videos Considered:</strong> ${result.videoCount} (posted in the last 30 days)</p>
+        <p><strong>Estimated Views:</strong> ${result.estimatedViews.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+        <p><strong>Engagement Rate:</strong> ${result.engagementRate.toFixed(2)}%</p>
+        <p><strong>Minimum Fee:</strong> $${result.minFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (CPM: $${result.minCPM})</p>
+        <p><strong>Maximum Fee:</strong> $${result.maxFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (CPM: $${result.maxCPM})</p>
+        <p><strong>Fees Rounded:</strong> ${result.roundFees ? "Yes" : "No"}</p>
+    `;
+
+    resultsContainer.appendChild(collapsible);
+    resultsContainer.appendChild(contentDiv);
+}
+
+// Function to update the results history display
+function updateHistory() {
+    const historyContainer = document.getElementById('historyContainer');
+    historyContainer.innerHTML = ''; // Clear previous content
+
+    if (resultsHistory.length === 0) return;
+
+    const collapsible = document.createElement('button');
+    collapsible.className = 'collapsible';
+    collapsible.textContent = `Results History (${resultsHistory.length} entries)`;
+    collapsible.addEventListener('click', function() {
+        this.classList.toggle('active');
+        const content = this.nextElementSibling;
+        if (content.style.maxHeight){
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+        } 
+    });
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'content';
+
+    resultsHistory.slice().reverse().forEach(result => {
+        const timestamp = result.timestamp.toLocaleString();
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        historyItem.innerHTML = `
+            <p class="timestamp">${timestamp}</p>
+            <p><strong>Creator Name:</strong> ${result.creatorName}</p>
+            <p><strong>Videos Considered:</strong> ${result.videoCount}</p>
+            <p><strong>Estimated Views:</strong> ${result.estimatedViews.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+            <p><strong>Engagement Rate:</strong> ${result.engagementRate.toFixed(2)}%</p>
+            <p><strong>Minimum Fee:</strong> $${result.minFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (CPM: $${result.minCPM})</p>
+            <p><strong>Maximum Fee:</strong> $${result.maxFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (CPM: $${result.maxCPM})</p>
+            <p><strong>Fees Rounded:</strong> ${result.roundFees ? "Yes" : "No"}</p>
+            <hr>
+        `;
+        contentDiv.appendChild(historyItem);
+    });
+
+    historyContainer.appendChild(collapsible);
+    historyContainer.appendChild(contentDiv);
+}
+
+// Event listener for collapsible sections
+document.addEventListener('DOMContentLoaded', function() {
+    const coll = document.getElementsByClassName('collapsible');
+    for (let i = 0; i < coll.length; i++) {
+        coll[i].addEventListener('click', function() {
+            this.classList.toggle('active');
+            const content = this.nextElementSibling;
+            if (content.style.maxHeight){
+                content.style.maxHeight = null;
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+            } 
+        });
+    }
+});
+</script>
+
+</body>
+</html>
