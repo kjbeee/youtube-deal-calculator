@@ -13,664 +13,292 @@
             margin: 0;
             background-color: #f4f4f4;
         }
-        .header {
-            background-color: #d32f2f;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        .header h1 {
-            margin-bottom: 10px;
-        }
         .container {
             max-width: 1200px;
             margin: 20px auto;
             padding: 0 15px;
         }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: bold;
+        section {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #fff;
+        }
+        h1, h2 {
+            color: #d32f2f;
+            text-align: center;
         }
         input[type="text"],
         input[type="number"],
-        input[type="date"] {
+        input[type="date"],
+        button {
             padding: 10px;
             width: 100%;
             box-sizing: border-box;
             margin-bottom: 15px;
-            border: 1px solid #ccc;
             border-radius: 5px;
-        }
-        .button-container {
-            text-align: center;
-            margin-top: 30px;
         }
         button {
             background-color: #d32f2f;
             color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
             cursor: pointer;
+            border: none;
         }
         button:hover {
             background-color: #b71c1c;
         }
-        .results,
-        .history {
-            margin-top: 40px;
-        }
-        .results-section {
-            margin-top: 40px;
-        }
-        .switcher-container {
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
-        .channel-result {
-            background-color: white;
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-        .channel-result img {
-            border-radius: 50%;
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-        .channel-result button {
-            background-color: #1976d2;
-            margin-top: 10px;
-        }
-        .channel-result button:hover {
-            background-color: #1565c0;
-        }
-        /* CPM Slider Styles */
-        .slider-container {
-            margin-top: 20px;
-            text-align: center;
-        }
-        .slider-container label {
-            display: block;
-            margin-bottom: 5px;
-        }
         .slider {
             width: 100%;
-            margin-bottom: 10px;
         }
-        .slider-output {
-            text-align: center;
-            margin-top: 5px;
-            font-weight: bold;
-        }
-        /* Table Styles */
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            background-color: white;
         }
         th, td {
-            padding: 8px;
-            border: 1px solid #e0e0e0;
+            padding: 10px;
+            border: 1px solid #ccc;
             text-align: center;
-            font-size: 14px;
         }
         th {
             background-color: #d32f2f;
             color: white;
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        .expandable-row {
-            cursor: pointer;
-        }
-        .expanded-content {
-            display: none;
-        }
-        /* Padding between sections */
-        .section-padding {
-            margin-top: 40px;
-        }
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-            .channel-result {
-                text-align: center;
-            }
-            .channel-result img {
-                display: block;
-                margin: 10px auto;
-            }
-            table, thead, tbody, th, td, tr {
-                display: block;
-            }
-            thead tr {
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-            }
-            tr {
-                margin-bottom: 10px;
-            }
-            td {
-                border: none;
-                position: relative;
-                padding-left: 50%;
-                text-align: left;
-            }
-            td:before {
-                position: absolute;
-                top: 8px;
-                left: 16px;
-                width: 45%;
-                padding-right: 10px;
-                white-space: nowrap;
-                font-weight: bold;
-            }
-            /* Labels for mobile */
-            td:nth-of-type(1):before { content: "Video #"; }
-            td:nth-of-type(2):before { content: "Date Posted"; }
-            td:nth-of-type(3):before { content: "Views"; }
-            td:nth-of-type(4):before { content: "Likes"; }
-            td:nth-of-type(5):before { content: "Comments"; }
-            .button-container {
-                margin-top: 20px;
-            }
-            button {
-                width: 100%;
-            }
-        }
-        /* Tooltip Styles */
-        .tooltip {
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-            color: #d32f2f;
-            font-weight: bold;
-        }
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 120px;
-            background-color: #555;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%; /* Position above */
-            left: 50%;
-            margin-left: -60px; /* Center */
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 12px;
-        }
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
-        /* Scrollable Table */
-        .table-responsive {
-            overflow-x: auto;
+        .section-title {
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>YouTube Sponsorship Price Calculator</h1>
-    <p>Estimate sponsorship fees based on recent video performance.</p>
-</div>
-
 <div class="container">
-    <form id="calculatorForm">
-        <!-- Channel Search Section -->
+
+    <!-- Header Section -->
+    <section id="header-section">
+        <h1>YouTube Sponsorship Price Calculator</h1>
+        <p>Estimate sponsorship fees based on recent video performance.</p>
+    </section>
+
+    <!-- Search Section -->
+    <section id="search-section">
+        <h2 class="section-title">Search Section</h2>
         <label for="channelSearch">Search YouTube Channel:</label>
         <input type="text" id="channelSearch" name="channelSearch" placeholder="Enter channel name" required>
-        <div class="button-container">
-            <button type="button" onclick="searchChannel()">Search Channel</button>
-        </div>
+        <button type="button" onclick="searchChannel()">Search Channel</button>
         <div id="channelResults"></div>
+    </section>
 
-        <!-- Creator Name -->
-        <label for="creatorName">Creator Name:</label>
-        <input type="text" id="creatorName" name="creatorName" required readonly>
+    <!-- Price Section -->
+    <section id="price-section">
+        <h2 class="section-title">Price Section</h2>
+        <label for="cpmSlider">Select CPM ($):</label>
+        <input type="range" id="cpmSlider" name="cpmSlider" min="5" max="50" value="10" class="slider" oninput="updateCPMOutput()" step="1">
+        <div class="slider-output">Selected CPM: $<span id="cpmOutput">10</span></div>
+        <button type="button" onclick="calculateSponsorship()">Calculate Sponsorship Fee</button>
+    </section>
 
-        <!-- CPM Slider -->
-        <div class="slider-container">
-            <label for="cpmSlider">Select CPM ($): <span class="tooltip">?
-                <span class="tooltiptext">Cost per Mille (CPM) is the cost per 1000 views.</span>
-            </span></label>
-            <input type="range" id="cpmSlider" name="cpmSlider" min="5" max="50" value="10" class="slider" oninput="updateCPMOutput()" step="1">
-            <div class="slider-output">Selected CPM: $<span id="cpmOutput">10</span></div>
-            <div class="slider-labels">
-                <span style="float: left;">$50</span>
-                <span style="float: right;">$5</span>
-            </div>
-        </div>
+    <!-- Calculation Results Section -->
+    <section id="results-section">
+        <h2 class="section-title">Calculation Results</h2>
+        <div id="latestResults"></div>
+    </section>
 
-        <!-- Latest Results -->
-        <div id="latestResults" class="results-section"></div>
+    <!-- Video Data Section -->
+    <section id="video-data-section">
+        <h2 class="section-title">Video Data Section</h2>
+        <table id="videoDataTable">
+            <thead>
+                <tr>
+                    <th>Video #</th>
+                    <th>Date Posted</th>
+                    <th>Views</th>
+                    <th>Likes</th>
+                    <th>Comments</th>
+                </tr>
+            </thead>
+            <tbody id="videosContainer">
+                <!-- Video data rows will be inserted here -->
+            </tbody>
+        </table>
+    </section>
 
-        <!-- Video Data Table -->
-        <h2>Video Data</h2>
-        <div class="table-responsive">
-            <table id="videoDataTable">
-                <thead>
-                    <tr>
-                        <th>Video #</th>
-                        <th>Date Posted</th>
-                        <th>Views</th>
-                        <th>Likes</th>
-                        <th>Comments</th>
-                    </tr>
-                </thead>
-                <tbody id="videosContainer">
-                    <!-- Video data rows will be inserted here -->
-                </tbody>
-            </table>
-        </div>
+    <!-- History Section -->
+    <section id="history-section">
+        <h2 class="section-title">History Section</h2>
+        <div id="historyContainer"></div>
+    </section>
 
-        <!-- Rounding Switch -->
-        <div class="switcher-container">
-            <input type="checkbox" id="roundFees" name="roundFees">
-            <label for="roundFees">Round fees down to the nearest $100</label>
-        </div>
-
-        <!-- Calculate Button -->
-        <div class="button-container">
-            <button type="button" onclick="calculateSponsorship()">Calculate Sponsorship Fee</button>
-        </div>
-    </form>
-
-    <!-- Padding between sections -->
-    <div class="section-padding"></div>
-
-    <!-- Results Container -->
-    <div id="resultsContainer">
-        <!-- Latest result will be displayed here -->
-    </div>
-
-    <!-- Results History -->
-    <div class="history" id="historyContainer">
-        <!-- Historical results will be displayed here -->
-    </div>
 </div>
 
 <script>
-    // Place your API key here
-    const API_KEY = 'AIzaSyDDpDLMGnQTwu4BJzNqPz1Wg630b9G6ZFI';
+// Place your API key here
+const API_KEY = 'AIzaSyDDpDLMGnQTwu4BJzNqPz1Wg630b9G6ZFI';
 
-    let resultsHistory = [];
+let resultsHistory = [];
 
-    // Function to update CPM output
-    function updateCPMOutput() {
-        const cpmValue = document.getElementById('cpmSlider').value;
-        document.getElementById('cpmOutput').textContent = cpmValue;
+// Function to update CPM output
+function updateCPMOutput() {
+    const cpmValue = document.getElementById('cpmSlider').value;
+    document.getElementById('cpmOutput').textContent = cpmValue;
+}
+
+// Initialize CPM output
+updateCPMOutput();
+
+// Function to search for a channel by name
+function searchChannel() {
+    const query = document.getElementById('channelSearch').value;
+    if (!query) {
+        alert('Please enter a channel name.');
+        return;
     }
 
-    // Initialize CPM output
-    updateCPMOutput();
-
-    // Function to search for a channel by name
-    function searchChannel() {
-        const query = document.getElementById('channelSearch').value;
-        if (!query) {
-            alert('Please enter a channel name.');
-            return;
-        }
-
-        fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=5&q=${encodeURIComponent(query)}&key=${API_KEY}`)
-            .then(response => response.json())
-            .then(data => {
-                displayChannelResults(data.items);
-            })
-            .catch(error => {
-                console.error('Error fetching channel data:', error);
-                alert('An error occurred while searching for the channel.');
-            });
-    }
-
-    // Function to display channel search results
-    function displayChannelResults(channels) {
-        const channelResultsDiv = document.getElementById('channelResults');
-        channelResultsDiv.innerHTML = '';
-
-        if (channels.length === 0) {
-            channelResultsDiv.innerHTML = '<p>No channels found.</p>';
-            return;
-        }
-
-        channels.forEach(channel => {
-            const channelDiv = document.createElement('div');
-            channelDiv.className = 'channel-result';
-            channelDiv.innerHTML = `
-                <strong>${channel.snippet.title}</strong><br>
-                <img src="${channel.snippet.thumbnails.default.url}" alt="${channel.snippet.title}">
-                <p>${channel.snippet.description}</p>
-                <button onclick="selectChannel('${channel.id.channelId}', '${channel.snippet.title.replace(/'/g, "\\'")}')">Select Channel</button>
-            `;
-            channelResultsDiv.appendChild(channelDiv);
+    fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=5&q=${encodeURIComponent(query)}&key=${API_KEY}`)
+        .then(response => response.json())
+        .then(data => {
+            displayChannelResults(data.items);
+        })
+        .catch(error => {
+            console.error('Error fetching channel data:', error);
+            alert('An error occurred while searching for the channel.');
         });
+}
+
+// Function to display channel search results
+function displayChannelResults(channels) {
+    const channelResultsDiv = document.getElementById('channelResults');
+    channelResultsDiv.innerHTML = '';
+
+    if (channels.length === 0) {
+        channelResultsDiv.innerHTML = '<p>No channels found.</p>';
+        return;
     }
 
-    // Function to handle channel selection
-    function selectChannel(channelId, channelTitle) {
-        document.getElementById('creatorName').value = channelTitle;
-        document.getElementById('channelResults').innerHTML = '';
-        fetchChannelVideos(channelId);
-    }
+    channels.forEach(channel => {
+        const channelDiv = document.createElement('div');
+        channelDiv.className = 'channel-result';
+        channelDiv.innerHTML = `
+            <strong>${channel.snippet.title}</strong><br>
+            <img src="${channel.snippet.thumbnails.default.url}" alt="${channel.snippet.title}">
+            <p>${channel.snippet.description}</p>
+            <button onclick="selectChannel('${channel.id.channelId}', '${channel.snippet.title.replace(/'/g, "\\'")}')">Select Channel</button>
+        `;
+        channelResultsDiv.appendChild(channelDiv);
+    });
+}
 
-    // Function to fetch the channel's uploads playlist ID
-    function fetchChannelVideos(channelId) {
-        fetch(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${API_KEY}`)
-            .then(response => response.json())
-            .then(data => {
-                const uploadsPlaylistId = data.items[0].contentDetails.relatedPlaylists.uploads;
-                fetchVideosFromPlaylist(uploadsPlaylistId);
-            })
-            .catch(error => {
-                console.error('Error fetching channel uploads:', error);
-                alert('An error occurred while fetching channel uploads.');
-            });
-    }
+// Function to handle channel selection
+function selectChannel(channelId, channelTitle) {
+    document.getElementById('channelSearch').value = channelTitle;
+    document.getElementById('channelResults').innerHTML = '';
+    fetchChannelVideos(channelId);
+}
 
-    // Function to fetch videos from the uploads playlist
-    function fetchVideosFromPlaylist(playlistId) {
-        fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=10&playlistId=${playlistId}&key=${API_KEY}`)
-            .then(response => response.json())
-            .then(data => {
-                const videoIds = data.items.map(item => item.snippet.resourceId.videoId);
-                fetchVideoStatistics(videoIds);
-            })
-            .catch(error => {
-                console.error('Error fetching playlist videos:', error);
-                alert('An error occurred while fetching playlist videos.');
-            });
-    }
-
-    // Function to fetch video statistics
-    function fetchVideoStatistics(videoIds) {
-        fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoIds.join(',')}&key=${API_KEY}`)
-            .then(response => response.json())
-            .then(data => {
-                populateVideoData(data.items);
-            })
-            .catch(error => {
-                console.error('Error fetching video statistics:', error);
-                alert('An error occurred while fetching video statistics.');
-            });
-    }
-
-    // Function to populate video data into the table
-    function populateVideoData(videos) {
-        // Clear existing video inputs
-        const container = document.getElementById('videosContainer');
-        container.innerHTML = '';
-
-        videos.forEach((video, index) => {
-            const i = index + 1;
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${i}</td>
-                <td><input type="date" id="date${i}" name="date${i}" value="${formatDate(video.snippet.publishedAt)}" required></td>
-                <td><input type="number" id="views${i}" name="views${i}" value="${video.statistics.viewCount}" required></td>
-                <td><input type="number" id="likes${i}" name="likes${i}" value="${video.statistics.likeCount}" required></td>
-                <td><input type="number" id="comments${i}" name="comments${i}" value="${video.statistics.commentCount}" required></td>
-            `;
-            container.appendChild(row);
+// Function to fetch the channel's uploads playlist ID
+function fetchChannelVideos(channelId) {
+    fetch(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${API_KEY}`)
+        .then(response => response.json())
+        .then(data => {
+            const uploadsPlaylistId = data.items[0].contentDetails.relatedPlaylists.uploads;
+            fetchVideosFromPlaylist(uploadsPlaylistId);
+        })
+        .catch(error => {
+            console.error('Error fetching channel uploads:', error);
+            alert('An error occurred while fetching channel uploads.');
         });
-    }
+}
 
-    // Helper function to format date to YYYY-MM-DD
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = (`0${(date.getMonth()+1)}`).slice(-2);
-        const day = (`0${date.getDate()}`).slice(-2);
-        return `${year}-${month}-${day}`;
-    }
+// Function to fetch videos from the uploads playlist
+function fetchVideosFromPlaylist(playlistId) {
+    fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=10&playlistId=${playlistId}&key=${API_KEY}`)
+        .then(response => response.json())
+        .then(data => {
+            const videoIds = data.items.map(item => item.snippet.resourceId.videoId);
+            fetchVideoStatistics(videoIds);
+        })
+        .catch(error => {
+            console.error('Error fetching playlist videos:', error);
+            alert('An error occurred while fetching playlist videos.');
+        });
+}
 
-    // Function to validate inputs
-    function validateInputs() {
-        const videoRows = document.querySelectorAll('#videosContainer tr');
-        for (let i = 0; i < videoRows.length; i++) {
-            const index = i + 1;
-            const datePosted = document.getElementById(`date${index}`).value;
-            const views = document.getElementById(`views${index}`).value;
-            const likes = document.getElementById(`likes${index}`).value;
-            const comments = document.getElementById(`comments${index}`).value;
+// Function to fetch video statistics
+function fetchVideoStatistics(videoIds) {
+    fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoIds.join(',')}&key=${API_KEY}`)
+        .then(response => response.json())
+        .then(data => {
+            populateVideoData(data.items);
+        })
+        .catch(error => {
+            console.error('Error fetching video statistics:', error);
+            alert('An error occurred while fetching video statistics.');
+        });
+}
 
-            if (!datePosted || !views || !likes || !comments) {
-                alert(`Please fill out all fields for Video ${index}.`);
-                return false;
-            }
-        }
-        return true;
-    }
+// Function to populate video data into the table
+function populateVideoData(videos) {
+    // Clear existing video inputs
+    const container = document.getElementById('videosContainer');
+    container.innerHTML = '';
 
-    // Function to calculate sponsorship fee
-    function calculateSponsorship() {
-        if (!validateInputs()) {
-            return;
-        }
-
-        const creatorName = document.getElementById('creatorName').value;
-        let totalViews = 0;
-        let totalLikes = 0;
-        let totalComments = 0;
-        let videoCount = 0;
-
-        const today = new Date();
-        const last30Days = new Date();
-        last30Days.setDate(today.getDate() - 30);
-
-        const videoRows = document.querySelectorAll('#videosContainer tr');
-
-        // Gather data from each video
-        for (let i = 0; i < videoRows.length; i++) {
-            const index = i + 1;
-            const datePostedStr = document.getElementById(`date${index}`).value;
-            const views = parseInt(document.getElementById(`views${index}`).value) || 0;
-            const likes = parseInt(document.getElementById(`likes${index}`).value) || 0;
-            const comments = parseInt(document.getElementById(`comments${index}`).value) || 0;
-
-            // Convert date string to Date object
-            const datePosted = new Date(datePostedStr);
-
-            // Check if the video was posted within the last 30 days
-            if (datePosted >= last30Days && datePosted <= today) {
-                totalViews += views;
-                totalLikes += likes;
-                totalComments += comments;
-                videoCount++;
-            }
-        }
-
-        // Ensure there is at least one video in the last 30 days
-        if (videoCount === 0) {
-            alert("No videos were posted in the last 30 days. Cannot calculate estimated views.");
-            return;
-        }
-
-        const estimatedViews = totalViews / videoCount;
-        const engagementRate = totalViews > 0 ? ((totalLikes + totalComments) / totalViews) * 100 : 0;
-
-        // Get CPM from slider
-        let cpmValue = parseInt(document.getElementById('cpmSlider').value);
-
-        // Determine if rounding is enabled
-        const roundFees = document.getElementById('roundFees').checked;
-
-        // Calculate fees
-        let minFee = (estimatedViews / 1000) * cpmValue;
-        let maxFee = minFee; // Since only one CPM value is used
-
-        // Apply rounding if checkbox is selected
-        if (roundFees) {
-            minFee = Math.floor(minFee / 100) * 100;
-            maxFee = Math.floor(maxFee / 100) * 100;
-        }
-
-        // Create a result object
-        const result = {
-            timestamp: new Date(),
-            creatorName,
-            videoCount,
-            estimatedViews: estimatedViews,
-            engagementRate: engagementRate,
-            minFee: minFee,
-            maxFee: maxFee,
-            cpmValue,
-            roundFees,
-            videoData: [] // Store video data used in calculation
-        };
-
-        // Store video data
-        for (let i = 0; i < videoRows.length; i++) {
-            const index = i + 1;
-            const datePostedStr = document.getElementById(`date${index}`).value;
-            const views = document.getElementById(`views${index}`).value;
-            const likes = document.getElementById(`likes${index}`).value;
-            const comments = document.getElementById(`comments${index}`).value;
-            result.videoData.push({
-                videoNumber: index,
-                datePosted: datePostedStr,
-                views,
-                likes,
-                comments
-            });
-        }
-
-        // Add the result to the history array
-        resultsHistory.push(result);
-
-        // Update the results display
-        displayLatestResult(result);
-
-        // Update the history display
-        updateHistory();
-    }
-
-    // Function to display the latest result
-    function displayLatestResult(result) {
-        const latestResultsDiv = document.getElementById('latestResults');
-        latestResultsDiv.innerHTML = ''; // Clear previous content
-
-        const table = document.createElement('table');
-        table.innerHTML = `
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Videos Considered</th>
-                    <th>Estimated Views</th>
-                    <th>Engagement Rate</th>
-                    <th>Fee (CPM: $${result.cpmValue})</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="expandable-row" onclick="toggleExpandedContent(this)">
-                    <td>${result.creatorName}</td>
-                    <td>${result.videoCount}</td>
-                    <td>${result.estimatedViews.toLocaleString(undefined, {maximumFractionDigits: 0})}</td>
-                    <td>${result.engagementRate.toFixed(2)}%</td>
-                    <td>$${result.minFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                </tr>
-                <tr class="expanded-content">
-                    <td colspan="5">
-                        ${generateVideoDataTable(result.videoData)}
-                    </td>
-                </tr>
-            </tbody>
+    videos.forEach((video, index) => {
+        const i = index + 1;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${i}</td>
+            <td><input type="date" id="date${i}" name="date${i}" value="${formatDate(video.snippet.publishedAt)}" required></td>
+            <td><input type="number" id="views${i}" name="views${i}" value="${video.statistics.viewCount}" required></td>
+            <td><input type="number" id="likes${i}" name="likes${i}" value="${video.statistics.likeCount}" required></td>
+            <td><input type="number" id="comments${i}" name="comments${i}" value="${video.statistics.commentCount}" required></td>
         `;
-        latestResultsDiv.appendChild(table);
-    }
+        container.appendChild(row);
+    });
+}
 
-    // Function to update the results history display
-    function updateHistory() {
-        const historyContainer = document.getElementById('historyContainer');
-        historyContainer.innerHTML = ''; // Clear previous content
+// Helper function to format date to YYYY-MM-DD
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = (`0${(date.getMonth()+1)}`).slice(-2);
+    const day = (`0${date.getDate()}`).slice(-2);
+    return `${year}-${month}-${day}`;
+}
 
-        if (resultsHistory.length === 0) return;
+// Function to calculate sponsorship fee
+function calculateSponsorship() {
+    const cpmValue = parseInt(document.getElementById('cpmSlider').value);
+    const videoRows = document.querySelectorAll('#videosContainer tr');
+    let totalViews = 0;
+    videoRows.forEach(row => {
+        totalViews += parseInt(row.querySelector('input[name^="views"]').value) || 0;
+    });
+    const estimatedViews = totalViews / videoRows.length;
+    const sponsorshipFee = (estimatedViews / 1000) * cpmValue;
+    
+    // Display the result in the results section
+    document.getElementById('latestResults').innerHTML = `
+        <p><strong>Estimated Views:</strong> ${estimatedViews.toLocaleString()}</p>
+        <p><strong>Calculated Sponsorship Fee:</strong> $${sponsorshipFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+    `;
+    
+    // Add to history
+    resultsHistory.push({
+        estimatedViews,
+        sponsorshipFee
+    });
+    updateHistory();
+}
 
-        const table = document.createElement('table');
-        table.innerHTML = `
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Videos Considered</th>
-                    <th>Estimated Views</th>
-                    <th>Engagement Rate</th>
-                    <th>Fee</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${resultsHistory.map(result => `
-                    <tr class="expandable-row" onclick="toggleExpandedContent(this)">
-                        <td>${result.creatorName}</td>
-                        <td>${result.videoCount}</td>
-                        <td>${result.estimatedViews.toLocaleString(undefined, {maximumFractionDigits: 0})}</td>
-                        <td>${result.engagementRate.toFixed(2)}%</td>
-                        <td>$${result.minFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    </tr>
-                    <tr class="expanded-content">
-                        <td colspan="5">
-                            ${generateVideoDataTable(result.videoData)}
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
+// Function to update history section
+function updateHistory() {
+    const historyContainer = document.getElementById('historyContainer');
+    historyContainer.innerHTML = '';
+    resultsHistory.forEach((result, index) => {
+        historyContainer.innerHTML += `
+            <p><strong>Result ${index + 1}:</strong> Estimated Views: ${result.estimatedViews.toLocaleString()}, Sponsorship Fee: $${result.sponsorshipFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
         `;
-        historyContainer.appendChild(table);
-    }
-
-    // Function to generate video data table
-    function generateVideoDataTable(videoData) {
-        let tableHtml = `
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Video #</th>
-                            <th>Date Posted</th>
-                            <th>Views</th>
-                            <th>Likes</th>
-                            <th>Comments</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${videoData.map(video => `
-                            <tr>
-                                <td>${video.videoNumber}</td>
-                                <td>${video.datePosted}</td>
-                                <td>${parseInt(video.views).toLocaleString()}</td>
-                                <td>${parseInt(video.likes).toLocaleString()}</td>
-                                <td>${parseInt(video.comments).toLocaleString()}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        `;
-        return tableHtml;
-    }
-
-    // Function to toggle expanded content
-    function toggleExpandedContent(row) {
-        const nextRow = row.nextElementSibling;
-        if (nextRow && nextRow.classList.contains('expanded-content')) {
-            if (nextRow.style.display === 'table-row' || nextRow.style.display === '') {
-                nextRow.style.display = 'none';
-            } else {
-                nextRow.style.display = 'table-row';
-            }
-        }
-    }
+    });
+}
 </script>
 
 </body>
